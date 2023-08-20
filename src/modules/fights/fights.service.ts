@@ -38,8 +38,10 @@ export class FightsService {
     }
 
     const findFirstCombatant = await this.fighterRepository.findOne({
+      relations: ['weight'],
       where: { id: firstСombatant },
     });
+
     if (firstСombatant && !findFirstCombatant) {
       throw new HttpException(
         'not found first combatant',
@@ -48,6 +50,7 @@ export class FightsService {
     }
 
     const findSecondСombatant = await this.fighterRepository.findOne({
+      relations: ['weight'],
       where: { id: secondСombatant },
     });
 
@@ -57,6 +60,14 @@ export class FightsService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    if (findFirstCombatant.weight.id !== findSecondСombatant.weight.id) {
+      throw new HttpException(
+        'Weight categories do not match',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const findStatus = status
       ? await this.fighstStatusRepository.findOne({ where: { name: status } })
       : null;

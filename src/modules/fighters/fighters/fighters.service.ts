@@ -21,8 +21,6 @@ export class FightersService {
     private readonly weightRepository: Repository<Weight>,
     @InjectRepository(Fight)
     private readonly fightRepository: Repository<Fight>,
-    @InjectRepository(FightStatus)
-    private readonly fightStatusRepository: Repository<FightStatus>,
   ) {}
 
   async create(createFighterDto: CreateFighterDto) {
@@ -81,9 +79,34 @@ export class FightersService {
       },
     });
 
-    Object.keys(updateFighterDto).forEach((field) => {
-      fighter[field] = updateFighterDto[field];
+    const { nationality, weight, ...otherFields } = updateFighterDto;
+
+    Object.keys(otherFields).forEach((field) => {
+      fighter[field] = otherFields[field];
     });
+
+    if (nationality) {
+      const findNationality = await this.nationalityRepository.findOne({
+        where: { id: nationality },
+      });
+      if (!findNationality) {
+        throw new HttpException(
+          'Nationality not found',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      fighter.nationality = findNationality;
+    }
+
+    if (weight) {
+      const findWeight = await this.weightRepository.findOne({
+        where: { id: weight },
+      });
+      if (!findWeight) {
+        throw new HttpException('Weight not found', HttpStatus.BAD_REQUEST);
+      }
+      fighter.weight = findWeight;
+    }
 
     return this.fighterRepository.save(fighter);
   }

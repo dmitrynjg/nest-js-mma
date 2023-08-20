@@ -4,9 +4,18 @@ import {
   IsString,
   Matches,
   IsDateString,
+  IsEnum
 } from 'class-validator';
 import { IsGtZeroAndInt } from 'src/lib/decorators/validator/is-gt-zero-and-int.decorator';
 import { ApiProperty } from '@nestjs/swagger';
+
+enum FightStatus {
+  Knockout = 'knockout',
+  TKO = 'tko',
+  Draw = 'draw',
+  Canceled = 'canceled',
+  Disqualification = 'disqualification',
+}
 
 export class CreateFightDto {
   @ApiProperty({ example: 1, description: 'id in event schema' })
@@ -38,9 +47,7 @@ export class CreateFightDto {
     description: 'id of the second fighter in the fighter schema',
   })
   @IsOptional()
-  @IsString({
-    message: 'status must be a string',
-  })
+  @IsEnum(FightStatus)
   status: string;
 
   @ApiProperty({
